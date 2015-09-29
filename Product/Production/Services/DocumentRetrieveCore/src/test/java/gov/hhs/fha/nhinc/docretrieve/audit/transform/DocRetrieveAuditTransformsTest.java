@@ -210,7 +210,6 @@ public class DocRetrieveAuditTransformsTest
         assertEquals(DocRetrieveAuditTransformsConstants.PARTICIPANT_DOCUMENT_OBJ_ID_TYPE_DISPLAY_NAME,
             participantObject.getParticipantObjectIDTypeCode().
             getDisplayName());
-        assertSame("", participantObject.getParticipantObjectName());
     }
 
     private void assertParticipantPatientObjectIdentification(ParticipantObjectIdentificationType participantObject) {
