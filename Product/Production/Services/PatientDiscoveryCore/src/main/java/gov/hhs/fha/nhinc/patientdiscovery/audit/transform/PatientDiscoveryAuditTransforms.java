@@ -58,12 +58,12 @@ public class PatientDiscoveryAuditTransforms extends AuditTransforms<PRPAIN20130
 
     @Override
     protected AuditMessageType getParticipantObjectIdentificationForRequest(PRPAIN201305UV02 request,
-        AssertionType assertion, AuditMessageType auditMsg, NhinTargetSystemType target) {
+        AssertionType assertion, AuditMessageType auditMsg) {
 
         // TODO: auditMsg should either use a builder, or modify in-method with no return
         auditMsg = getPatientParticipantObjectIdentificationForRequest(request, auditMsg);
         try {
-            auditMsg = getQueryParamsParticipantObjectIdentificationForRequest(request, auditMsg, target);
+            auditMsg = getQueryParamsParticipantObjectIdentificationForRequest(request, auditMsg);
         } catch (JAXBException ex) {
             LOG.error("Error while creating ParticipantObjectIdentificationQueryByParameters segment : "
                 + ex.getLocalizedMessage(), ex);
@@ -240,11 +240,10 @@ public class PatientDiscoveryAuditTransforms extends AuditTransforms<PRPAIN20130
     }
 
     private AuditMessageType getQueryParamsParticipantObjectIdentificationForRequest(PRPAIN201305UV02 request,
-        AuditMessageType auditMsg, NhinTargetSystemType target) throws JAXBException {
+        AuditMessageType auditMsg) throws JAXBException {
 
         ParticipantObjectIdentificationType participantObject = buildBaseParticipantObjectIdentificationType(
-            getParticipantObjectId(request), HomeCommunityMap.formatHomeCommunityId(target.getHomeCommunity().
-                getHomeCommunityId()));
+            getParticipantObjectId(request));
         participantObject.setParticipantObjectQuery(getParticipantObjectQueryForRequest(request));
         auditMsg.getParticipantObjectIdentification().add(participantObject);
         return auditMsg;
@@ -254,8 +253,7 @@ public class PatientDiscoveryAuditTransforms extends AuditTransforms<PRPAIN20130
         AuditMessageType auditMsg) throws JAXBException {
 
         ParticipantObjectIdentificationType participantObject = buildBaseParticipantObjectIdentificationType(
-            getParticipantObjectId(response), HomeCommunityMap.formatHomeCommunityId(
-                HomeCommunityMap.getLocalHomeCommunityId()));
+            getParticipantObjectId(response));
         participantObject.setParticipantObjectQuery(getParticipantObjectQueryForResponse(response));
         auditMsg.getParticipantObjectIdentification().add(participantObject);
         return auditMsg;
@@ -278,7 +276,7 @@ public class PatientDiscoveryAuditTransforms extends AuditTransforms<PRPAIN20130
     }
 
     private ParticipantObjectIdentificationType buildBaseParticipantObjectIdentificationType(
-        String participantObjectId, String target) {
+        String participantObjectId) {
 
         ParticipantObjectIdentificationType participantObject = createParticipantObjectIdentification(
             PatientDiscoveryAuditTransformsConstants.PARTICIPANT_QUERYPARAMS_OBJ_TYPE_CODE_SYSTEM,
@@ -287,9 +285,6 @@ public class PatientDiscoveryAuditTransforms extends AuditTransforms<PRPAIN20130
             PatientDiscoveryAuditTransformsConstants.PARTICIPANT_QUERYPARAMS_OBJ_ID_TYPE_CODE_SYSTEM,
             PatientDiscoveryAuditTransformsConstants.PARTICIPANT_QUERYPARAMS_OBJ_ID_TYPE_DISPLAY_NAME);
         participantObject.setParticipantObjectID(participantObjectId);
-        participantObject.setParticipantObjectName(target);
-        //participantObject.setParticipantObjectName(HomeCommunityMap.formatHomeCommunityId(
-        //  HomeCommunityMap.getLocalHomeCommunityId()));
 
         return participantObject;
     }
