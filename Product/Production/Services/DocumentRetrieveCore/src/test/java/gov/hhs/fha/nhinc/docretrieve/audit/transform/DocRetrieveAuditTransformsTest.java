@@ -51,6 +51,12 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import gov.hhs.fha.nhinc.audit.transform.AuditTransformsTest;
+import ihe.iti.xds_b._2007.RetrieveDocumentSetResponseType.DocumentResponse;
+import java.lang.management.ManagementFactory;
+import java.util.List;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 /**
  * This class is designed to test Retrieve Document Audit Transforms.
@@ -202,7 +208,9 @@ public class DocRetrieveAuditTransformsTest
         assertEquals(DocRetrieveAuditTransformsConstants.PARTICIPANT_DOCUMENT_OBJ_ID_TYPE_CODE_SYSTEM,
             participantObject.getParticipantObjectIDTypeCode().getCodeSystemName());
         assertEquals(DocRetrieveAuditTransformsConstants.PARTICIPANT_DOCUMENT_OBJ_ID_TYPE_DISPLAY_NAME,
-            participantObject.getParticipantObjectIDTypeCode().getDisplayName());
+            participantObject.getParticipantObjectIDTypeCode().
+            getDisplayName());
+        assertSame("", participantObject.getParticipantObjectName());
     }
 
     private void assertParticipantPatientObjectIdentification(ParticipantObjectIdentificationType participantObject) {
