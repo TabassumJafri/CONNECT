@@ -41,6 +41,8 @@ import org.caqh.soap.wsdl.corerule2_2_0.COREEnvelopeBatchSubmissionResponse;
 public class OutboundCORE_X12DSGenericBatchResponseStrategyImpl_g0 implements OrchestrationStrategy {
 
     private static final Logger LOG = Logger.getLogger(OutboundCORE_X12DSGenericBatchResponseStrategyImpl_g0.class);
+    private final NhinCORE_X12DGenericBatchResponseProxyObjectFactory factory
+        = new NhinCORE_X12DGenericBatchResponseProxyObjectFactory();
 
     /**
      *
@@ -57,10 +59,13 @@ public class OutboundCORE_X12DSGenericBatchResponseStrategyImpl_g0 implements Or
 
     private void process(OutboundCORE_X12DSGenericBatchResponseOrchestratable message) {
         LOG.info("Begin OutboundCORE_X12DSGenericBatchResponseStrategyImpl_g0.process()");
-        NhinCORE_X12DGenericBatchResponseProxyObjectFactory factory = new NhinCORE_X12DGenericBatchResponseProxyObjectFactory();
         NhinCORE_X12DSGenericBatchResponseProxy proxy = factory.getNhinCORE_X12DSGenericBatchResponseProxy();
         COREEnvelopeBatchSubmissionResponse oResponse = proxy.batchSubmitTransaction(message.getRequest(), message.getAssertion(), message.getTarget(), NhincConstants.GATEWAY_API_LEVEL.LEVEL_g0);
         message.setResponse(oResponse);
         LOG.info("End OutboundCORE_X12DSGenericBatchResponseStrategyImpl_g0.process()");
+    }
+
+    protected NhinCORE_X12DGenericBatchResponseProxyObjectFactory getProxyFactory() {
+        return factory;
     }
 }

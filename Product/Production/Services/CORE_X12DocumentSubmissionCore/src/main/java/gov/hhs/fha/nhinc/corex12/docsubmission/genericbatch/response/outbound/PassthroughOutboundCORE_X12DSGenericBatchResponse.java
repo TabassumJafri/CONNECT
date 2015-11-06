@@ -44,9 +44,13 @@ import org.caqh.soap.wsdl.corerule2_2_0.COREEnvelopeBatchSubmissionResponse;
  */
 public class PassthroughOutboundCORE_X12DSGenericBatchResponse implements OutboundCORE_X12DSGenericBatchResponse {
 
-    private final OutboundCORE_X12DSGenericBatchResponseDelegate dsDelegate = 
-        new OutboundCORE_X12DSGenericBatchResponseDelegate();
-    private final CORE_X12BatchSubmissionAuditLogger auditLogger = new CORE_X12BatchSubmissionAuditLogger();
+    private OutboundCORE_X12DSGenericBatchResponseDelegate dsDelegate;
+    private CORE_X12BatchSubmissionAuditLogger auditLogger;
+
+    public PassthroughOutboundCORE_X12DSGenericBatchResponse() {
+        this.dsDelegate = new OutboundCORE_X12DSGenericBatchResponseDelegate();
+        this.auditLogger = new CORE_X12BatchSubmissionAuditLogger();
+    }
 
     /**
      *
@@ -65,8 +69,7 @@ public class PassthroughOutboundCORE_X12DSGenericBatchResponse implements Outbou
         COREEnvelopeBatchSubmissionResponse oResponse;
         OutboundCORE_X12DSGenericBatchResponseOrchestratable dsOrchestratable = createOrchestratable(dsDelegate, msg,
             targetSystem, assertion);
-        oResponse = ((OutboundCORE_X12DSGenericBatchResponseOrchestratable) 
-            dsDelegate.process(dsOrchestratable)).getResponse();
+        oResponse = ((OutboundCORE_X12DSGenericBatchResponseOrchestratable) dsDelegate.process(dsOrchestratable)).getResponse();
         return oResponse;
     }
 
@@ -78,12 +81,12 @@ public class PassthroughOutboundCORE_X12DSGenericBatchResponse implements Outbou
      * @param assertion
      * @return OutboundCORE_X12DSGenericBatchRequestOrchestratable
      */
-    public OutboundCORE_X12DSGenericBatchResponseOrchestratable createOrchestratable(
+    protected OutboundCORE_X12DSGenericBatchResponseOrchestratable createOrchestratable(
         OutboundCORE_X12DSGenericBatchResponseDelegate delegate, COREEnvelopeBatchSubmission request,
         NhinTargetSystemType targetSystem, AssertionType assertion) {
 
-        OutboundCORE_X12DSGenericBatchResponseOrchestratable core_x12dsOrchestratable = 
-            new OutboundCORE_X12DSGenericBatchResponseOrchestratable(delegate);
+        OutboundCORE_X12DSGenericBatchResponseOrchestratable core_x12dsOrchestratable
+            = new OutboundCORE_X12DSGenericBatchResponseOrchestratable(delegate);
         core_x12dsOrchestratable.setAssertion(assertion);
         core_x12dsOrchestratable.setRequest(request);
         core_x12dsOrchestratable.setTarget(targetSystem);
@@ -97,4 +100,11 @@ public class PassthroughOutboundCORE_X12DSGenericBatchResponse implements Outbou
             Boolean.TRUE, null, NhincConstants.CORE_X12DS_GENERICBATCH_RESPONSE_SERVICE_NAME);
     }
 
+    protected CORE_X12BatchSubmissionAuditLogger getAuditLogger() {
+        return this.auditLogger;
+    }
+
+    protected OutboundCORE_X12DSGenericBatchResponseDelegate getDelegate() {
+        return this.dsDelegate;
+    }
 }
