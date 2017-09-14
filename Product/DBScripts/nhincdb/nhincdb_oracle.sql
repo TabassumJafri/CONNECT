@@ -1186,7 +1186,7 @@ INSERT INTO "NHINCUSER"."PAGEPREFERENCE" (
 	,PREFROLEID
 	)
 VALUES (
-	22
+	25
 	,'auditLog.xhtml'
 	,'AuditSearch'
 	,0
@@ -1201,7 +1201,7 @@ INSERT INTO "NHINCUSER"."PAGEPREFERENCE" (
 	,PREFROLEID
 	)
 VALUES (
-	23
+	26
 	,'auditLog.xhtml'
 	,'AuditSearch'
 	,0
@@ -1216,11 +1216,55 @@ INSERT INTO "NHINCUSER"."PAGEPREFERENCE" (
 	,PREFROLEID
 	)
 VALUES (
-	24
+	27
 	,'auditLog.xhtml'
 	,'AuditSearch'
 	,0
 	,3
 	);
 
+INSERT INTO "NHINCUSER"."PAGEPREFERENCE" (
+	PREFID
+	,PAGENAME
+	,PAGEDESC
+	,ACCESSPAGE
+	,PREFROLEID
+	)
+VALUES (
+	28
+	,'certificateManager.xhtml'
+	,'Certificate Management'
+	,0
+	,1
+	);
+
+INSERT INTO "NHINCUSER"."PAGEPREFERENCE" (
+	PREFID
+	,PAGENAME
+	,PAGEDESC
+	,ACCESSPAGE
+	,PREFROLEID
+	)
+VALUES (
+	29
+	,'certificateManager.xhtml'
+	,'Certificate Management'
+	,- 1
+	,2
+	);
+
+INSERT INTO "NHINCUSER"."PAGEPREFERENCE" (
+	PREFID
+	,PAGENAME
+	,PAGEDESC
+	,ACCESSPAGE
+	,PREFROLEID
+	)
+VALUES (
+	30
+	,'certificateManager.xhtml'
+	,'Certificate Management'
+	,- 1
+	,3
+	);  
 COMMIT;
