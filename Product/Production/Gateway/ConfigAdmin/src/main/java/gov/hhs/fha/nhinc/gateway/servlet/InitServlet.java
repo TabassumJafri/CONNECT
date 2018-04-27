@@ -24,25 +24,49 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package gov.hhs.fha.nhinc.callback.opensaml;
+package gov.hhs.fha.nhinc.gateway.servlet;
+
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- * @author mikhelamdex
- *
+ * @author tjafri
  */
-public class SAMLAssertionBuilderException extends RuntimeException {
+public class InitServlet extends HttpServlet {
 
-    private static final long serialVersionUID = -4219112462888454641L;
+    /**
+     * The Constant serialVersionUID.
+     */
+    private static final long serialVersionUID = -1729068458495053781L;
 
-    public SAMLAssertionBuilderException(String message) {
-        super(message);
+    /**
+     * The Constant LOG.
+     */
+    private static final Logger LOG = LoggerFactory.getLogger(InitServlet.class);
+
+    /**
+     * Initializes the servlet
+     *
+     * @param config the config
+     * @throws ServletException the servlet exception
+     * @see gov.fha.hhs.nhinc.gateway.AbstractJMXEnabledServlet#init(javax.servlet.ServletConfig)
+     */
+    @Override
+    public void init(ServletConfig config) throws ServletException {
+        LOG.debug("InitServlet start...");
+        super.init(config);
     }
 
-    public SAMLAssertionBuilderException(Throwable throwable) {
-        super(throwable);
-    }
-
-    public SAMLAssertionBuilderException(String message, Throwable throwable) {
-        super(message, throwable);
+    /**
+     * Servlet destroy method.
+     * <p>
+     */
+    @Override
+    public void destroy() {
+        LOG.debug("InitServlet shutdown stopping executor(s)....");
+        super.destroy();
     }
 }
