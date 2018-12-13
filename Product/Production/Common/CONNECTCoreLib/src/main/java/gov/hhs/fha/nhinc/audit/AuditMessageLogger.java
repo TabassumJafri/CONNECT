@@ -24,32 +24,16 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package gov.hhs.fha.nhinc.messaging.client;
+package gov.hhs.fha.nhinc.audit;
 
 import gov.hhs.fha.nhinc.common.auditlog.LogEventRequestType;
 import gov.hhs.fha.nhinc.common.nhinccommon.AssertionType;
-import gov.hhs.fha.nhinc.messaging.service.port.ServicePortDescriptor;
 
 /**
- * @author bhumphrey
  *
+ * @author tjafri
  */
-public abstract class CONNECTClientFactory {
+public interface AuditMessageLogger {
 
-    public abstract <T> CONNECTClient<T> getCONNECTClientSecured(ServicePortDescriptor<T> portDescriptor, String url,
-        AssertionType assertion);
-
-    public abstract <T> CONNECTClient<T> getCONNECTClientSecured(ServicePortDescriptor<T> portDescriptor,
-        AssertionType assertion, String url, String targetHomeCommunityId, String serviceName);
-
-    public abstract <T> CONNECTClient<T> getCONNECTClientUnsecured(ServicePortDescriptor<T> portDescriptor, String url,
-        AssertionType assertion);
-
-    public abstract <T> CONNECTClient<T> getCONNECTClientSecured(ServicePortDescriptor<T> portDescriptor,
-        AssertionType assertion, String url, String targetHomeCommunityId, String serviceName,
-        LogEventRequestType auditMsg);
-
-    public static CONNECTClientFactory getInstance() {
-        return new CONNECTCXFClientFactory();
-    }
+    public void auditLogMessages(LogEventRequestType auditLogMsg, AssertionType assertion);
 }

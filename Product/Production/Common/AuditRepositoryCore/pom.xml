@@ -26,19 +26,18 @@
             <groupId>org.connectopensource</groupId>
             <artifactId>AuditRepositoryWebservices</artifactId>
         </dependency>
-
         <!-- Java EE APIs -->
         <dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>
-        </dependency>		
-		
+        </dependency>
+
         <!-- Persistence -->
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-core</artifactId>
         </dependency>
-		
+
         <dependency>
 			<groupId>org.hibernate.common</groupId>
 			<artifactId>hibernate-commons-annotations</artifactId>

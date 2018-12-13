@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2009-2018, United States Government, as represented by the Secretary of Health and Human Services.
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above
@@ -12,7 +12,7 @@
  *     * Neither the name of the United States Government nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -26,16 +26,14 @@
  */
 package gov.hhs.fha.nhinc.audit;
 
-import gov.hhs.fha.nhinc.audit.ejb.AuditEJBLogger;
 import gov.hhs.fha.nhinc.audit.transform.AuditTransforms;
+import gov.hhs.fha.nhinc.common.auditlog.LogEventRequestType;
 import gov.hhs.fha.nhinc.common.nhinccommon.AssertionType;
 import gov.hhs.fha.nhinc.common.nhinccommon.NhinTargetSystemType;
 import gov.hhs.fha.nhinc.nhinclib.NhincConstants;
 import gov.hhs.fha.nhinc.properties.PropertyAccessException;
 import gov.hhs.fha.nhinc.properties.PropertyAccessor;
 import java.util.Properties;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,9 +45,10 @@ import org.slf4j.LoggerFactory;
  * @param <T>
  * @param <K>
  */
-public abstract class AuditLogger<T, K> {
+public abstract class AuditMessage<T, K> {
 
-    private static final Logger LOG = LoggerFactory.getLogger(AuditLogger.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AuditMessage.class);
+    private AuditEJBLookup ejblookup = new AuditEJBLookup();
 
     /**
      * ATNA-compliant logging for a request message of type T
@@ -64,15 +63,19 @@ public abstract class AuditLogger<T, K> {
      * @param isRequesting true for initiator, false for responder
      * @param webContextProperties Properties loaded from message context
      * @param serviceName Name of the Service being audited
+     * @return
      */
-    public void auditRequestMessage(T request, AssertionType assertion, NhinTargetSystemType target, String direction,
-            String _interface, Boolean isRequesting, Properties webContextProperties, String serviceName) {
+    public LogEventRequestType auditRequestMessage(T request, AssertionType assertion, NhinTargetSystemType target,
+        String direction,
+        String _interface, Boolean isRequesting, Properties webContextProperties, String serviceName) {
         LOG.trace("--- Before auditing of request message ---");
-        if (isAuditLoggingOn(serviceName) && getAuditLogger() != null) {
-            getAuditLogger().auditRequestMessage(request, assertion, target, direction, _interface, isRequesting,
-                    webContextProperties, serviceName, getAuditTransforms());
+        LogEventRequestType auditLogMsg = null;
+        if (isAuditLoggingOn(serviceName) && null != getAuditLogger()) {
+            auditLogMsg = getAuditTransforms().transformRequestToAuditMsg(request, assertion, target,
+                direction, _interface, isRequesting, webContextProperties, serviceName);
         }
         LOG.trace("--- After auditing of request message ---");
+        return auditLogMsg;
     }
 
     /**
@@ -89,28 +92,20 @@ public abstract class AuditLogger<T, K> {
      * @param isRequesting true/false identifies initiator/responder
      * @param webContextProperties Properties loaded from message context
      * @param serviceName Name of the Service being audited
+     * @return
      */
-    public void auditResponseMessage(T request, K response, AssertionType assertion, NhinTargetSystemType target,
-            String direction, String _interface, Boolean isRequesting, Properties webContextProperties,
-            String serviceName) {
-
+    public LogEventRequestType auditResponseMessage(T request, K response, AssertionType assertion,
+        NhinTargetSystemType target, String direction, String _interface, Boolean isRequesting,
+        Properties webContextProperties, String serviceName) {
         LOG.trace("--- Before auditing of response message ---");
-        if (isAuditLoggingOn(serviceName) && getAuditLogger() != null) {
-            getAuditLogger().auditResponseMessage(request, response, assertion, target, direction, _interface,
-                    isRequesting, webContextProperties, serviceName, getAuditTransforms());
+        LogEventRequestType auditLogMsg = null;
+        if (isAuditLoggingOn(serviceName) && null != getAuditLogger()) {
+            auditLogMsg = getAuditTransforms().transformResponseToAuditMsg(request, response, assertion,
+                target, direction, _interface, isRequesting, webContextProperties, serviceName);
+
         }
         LOG.trace("--- After auditing of response message ---");
-    }
-
-    protected AuditEJBLogger getAuditLogger() {
-        try {
-            String globalAuditLoggerAsyncEJBName = "java:app/" + NhincConstants.EJB_CORE_MODULE_NAME + "/"
-                    + NhincConstants.AUDIT_LOGGER_EJB_BEAN_NAME;
-            return (AuditEJBLogger) new InitialContext().lookup(globalAuditLoggerAsyncEJBName);
-        } catch (NamingException ex) {
-            LOG.error("JNDI EJB Lookup Failed : " + ex.getMessage(), ex);
-            return null;
-        }
+        return auditLogMsg;
     }
 
     /**
@@ -124,10 +119,14 @@ public abstract class AuditLogger<T, K> {
 
         try {
             return PropertyAccessor.getInstance().getPropertyBoolean(NhincConstants.AUDIT_LOGGING_PROPERTY_FILE,
-                    serviceName);
+                serviceName);
         } catch (PropertyAccessException ex) {
             LOG.error("Unable to read the Audit logging property: " + ex.getLocalizedMessage(), ex);
         }
         return false;
+    }
+
+    public AuditMessageLogger getAuditLogger() {
+        return ejblookup.getAuditLogger();
     }
 }

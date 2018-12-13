@@ -27,6 +27,7 @@
 package gov.hhs.fha.nhinc.messaging.service.decorator;
 
 import gov.hhs.fha.nhinc.callback.SamlConstants;
+import gov.hhs.fha.nhinc.common.auditlog.LogEventRequestType;
 import gov.hhs.fha.nhinc.common.nhinccommon.AssertionType;
 import gov.hhs.fha.nhinc.messaging.service.ServiceEndpoint;
 import gov.hhs.fha.nhinc.nhinclib.NhincConstants;
@@ -42,6 +43,7 @@ public class SAMLServiceEndpointDecorator<T> extends ServiceEndpointDecorator<T>
     private AssertionType assertion;
     private String targetHomeCommunityId = null;
     private String serviceName = null;
+    private LogEventRequestType auditMsg;
 
     public SAMLServiceEndpointDecorator(ServiceEndpoint<T> decoratoredEndpoint, AssertionType assertion) {
         super(decoratoredEndpoint);
@@ -59,6 +61,15 @@ public class SAMLServiceEndpointDecorator<T> extends ServiceEndpointDecorator<T>
         this.serviceName = serviceName;
     }
 
+    public SAMLServiceEndpointDecorator(ServiceEndpoint<T> decoratoredEndpoint, AssertionType assertion,
+        String targetHomeCommunityId, String serviceName, LogEventRequestType auditMsg) {
+        super(decoratoredEndpoint);
+        this.assertion = assertion;
+        this.targetHomeCommunityId = targetHomeCommunityId;
+        this.serviceName = serviceName;
+        this.auditMsg = auditMsg;
+    }
+
     @Override
     public void configure() {
         super.configure();
@@ -73,6 +84,9 @@ public class SAMLServiceEndpointDecorator<T> extends ServiceEndpointDecorator<T>
         }
         if (serviceName != null) {
             requestContext.put(SamlConstants.ACTION_PROP, serviceName);
+        }
+        if (auditMsg != null) {
+            requestContext.put("auditMsg", auditMsg);
         }
     }
 

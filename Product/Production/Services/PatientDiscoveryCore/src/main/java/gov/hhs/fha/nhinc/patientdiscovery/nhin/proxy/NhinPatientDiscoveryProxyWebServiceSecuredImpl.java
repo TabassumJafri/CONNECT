@@ -27,6 +27,7 @@
 package gov.hhs.fha.nhinc.patientdiscovery.nhin.proxy;
 
 import gov.hhs.fha.nhinc.aspect.NwhinInvocationEvent;
+import gov.hhs.fha.nhinc.common.auditlog.LogEventRequestType;
 import gov.hhs.fha.nhinc.common.nhinccommon.AssertionType;
 import gov.hhs.fha.nhinc.common.nhinccommon.NhinTargetSystemType;
 import gov.hhs.fha.nhinc.event.error.ErrorEventException;
@@ -38,6 +39,7 @@ import gov.hhs.fha.nhinc.nhinclib.NhincConstants;
 import gov.hhs.fha.nhinc.nhinclib.NullChecker;
 import gov.hhs.fha.nhinc.patientdiscovery.aspect.PRPAIN201305UV02EventDescriptionBuilder;
 import gov.hhs.fha.nhinc.patientdiscovery.aspect.PRPAIN201306UV02EventDescriptionBuilder;
+import gov.hhs.fha.nhinc.patientdiscovery.audit.PatientDiscoveryAuditMessage;
 import gov.hhs.fha.nhinc.patientdiscovery.nhin.proxy.service.RespondingGatewayServicePortDescriptor;
 import gov.hhs.fha.nhinc.transform.subdisc.HL7PRPA201306Transforms;
 import ihe.iti.xcpd._2009.RespondingGatewayPortType;
@@ -56,9 +58,10 @@ public class NhinPatientDiscoveryProxyWebServiceSecuredImpl implements NhinPatie
     private static final Logger LOG = LoggerFactory.getLogger(NhinPatientDiscoveryProxyWebServiceSecuredImpl.class);
 
     protected CONNECTClient<RespondingGatewayPortType> getCONNECTSecuredClient(NhinTargetSystemType target,
-        ServicePortDescriptor<RespondingGatewayPortType> portDescriptor, String url, AssertionType assertion) {
+        ServicePortDescriptor<RespondingGatewayPortType> portDescriptor, String url, AssertionType assertion,
+        LogEventRequestType auditMsg) {
         return CONNECTClientFactory.getInstance().getCONNECTClientSecured(portDescriptor, assertion, url,
-            target.getHomeCommunity().getHomeCommunityId(), NhincConstants.PATIENT_DISCOVERY_SERVICE_NAME);
+            target.getHomeCommunity().getHomeCommunityId(), NhincConstants.PATIENT_DISCOVERY_SERVICE_NAME, auditMsg);
     }
 
     @Override
@@ -77,7 +80,8 @@ public class NhinPatientDiscoveryProxyWebServiceSecuredImpl implements NhinPatie
                     url = ExchangeManager.getInstance().getDefaultEndpointURL(
                         target.getHomeCommunity().getHomeCommunityId(),
                         NhincConstants.PATIENT_DISCOVERY_SERVICE_NAME, target.getExchangeName());
-                    LOG.debug("After target system URL look up. URL for service: {} is: {}" ,NhincConstants.PATIENT_DISCOVERY_SERVICE_NAME, url);
+                    LOG.debug("After target system URL look up. URL for service: {} is: {}",
+                        NhincConstants.PATIENT_DISCOVERY_SERVICE_NAME, url);
                 }
 
                 if (NullChecker.isNotNullish(url)) {
@@ -85,12 +89,13 @@ public class NhinPatientDiscoveryProxyWebServiceSecuredImpl implements NhinPatie
                         = new RespondingGatewayServicePortDescriptor();
 
                     CONNECTClient<RespondingGatewayPortType> client = getCONNECTSecuredClient(target, portDescriptor,
-                        url, assertion);
+                        url, assertion, getAuditMessage(request, assertion, target));
 
                     response = (PRPAIN201306UV02) client.invokePort(RespondingGatewayPortType.class,
                         "respondingGatewayPRPAIN201305UV02", request);
                 } else {
-                    throw new WebServiceException("Could not determine URL for Patient Discovery Deferred Response endpoint");
+                    throw new WebServiceException(
+                        "Could not determine URL for Patient Discovery Deferred Response endpoint");
                 }
             } else {
                 throw new IllegalArgumentException("Request Message must be provided");
@@ -99,9 +104,21 @@ public class NhinPatientDiscoveryProxyWebServiceSecuredImpl implements NhinPatie
             PRPAIN201306UV02 errorResponse = new HL7PRPA201306Transforms().createPRPA201306ForErrors(request,
                 NhincConstants.PATIENT_DISCOVERY_ANSWER_NOT_AVAIL_ERR_CODE, e.getMessage());
 
-            throw new ErrorEventException(e,errorResponse, "Unable to call Nhin Patient Discovery");
+            throw new ErrorEventException(e, errorResponse, "Unable to call Nhin Patient Discovery");
         }
 
         return response;
+    }
+
+    protected PatientDiscoveryAuditMessage getPDAuditMessageBuilder() {
+        return new PatientDiscoveryAuditMessage();
+    }
+
+    private LogEventRequestType getAuditMessage(final PRPAIN201305UV02 request, final AssertionType assertion,
+        final NhinTargetSystemType target) {
+        return getPDAuditMessageBuilder().auditRequestMessage(request, assertion, target,
+            NhincConstants.AUDIT_LOG_OUTBOUND_DIRECTION,
+            NhincConstants.AUDIT_LOG_NHIN_INTERFACE, Boolean.TRUE, null,
+            NhincConstants.PATIENT_DISCOVERY_SERVICE_NAME);
     }
 }

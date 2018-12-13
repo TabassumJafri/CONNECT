@@ -26,11 +26,13 @@
  */
 package gov.hhs.fha.nhinc.callback.cxf;
 
+import gov.hhs.fha.nhinc.audit.AuditEJBLookup;
 import gov.hhs.fha.nhinc.callback.SamlConstants;
 import gov.hhs.fha.nhinc.callback.opensaml.CallbackMapProperties;
 import gov.hhs.fha.nhinc.callback.opensaml.CallbackProperties;
 import gov.hhs.fha.nhinc.callback.opensaml.HOKSAMLAssertionBuilder;
 import gov.hhs.fha.nhinc.callback.opensaml.SAMLAssertionBuilderException;
+import gov.hhs.fha.nhinc.common.auditlog.LogEventRequestType;
 import gov.hhs.fha.nhinc.common.nhinccommon.AssertionType;
 import gov.hhs.fha.nhinc.nhinclib.NhincConstants;
 import gov.hhs.fha.nhinc.properties.PropertyAccessException;
@@ -51,6 +53,8 @@ import org.apache.wss4j.common.saml.bean.Version;
 import org.apache.wss4j.policy.SPConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 
 /**
  * @author mweaver
@@ -63,6 +67,7 @@ public class CXFSAMLCallbackHandler implements CallbackHandler {
     public static final String HOK_CONFIRM = "urn:oasis:names:tc:SAML:2.0:cm:holder-of-key";
     private HOKSAMLAssertionBuilder builder = new HOKSAMLAssertionBuilder();
     private Crypto issuerCrypto = null;
+    private AuditEJBLookup ejblookup = new AuditEJBLookup();
 
     public CXFSAMLCallbackHandler() {
         accessor = PropertyAccessor.getInstance();
@@ -89,6 +94,7 @@ public class CXFSAMLCallbackHandler implements CallbackHandler {
 
                     final Message message = getCurrentMessage();
                     final Object obj = message.get("assertion");
+                    final Object auditMsg = message.get("auditMsg");
                     AssertionType custAssertion = getCustAssertion(obj);
                     final SAMLCallback oSAMLCallback = (SAMLCallback) callback;
 
@@ -110,7 +116,11 @@ public class CXFSAMLCallbackHandler implements CallbackHandler {
                     final SamlTokenCreator creator = new SamlTokenCreator();
                     final CallbackProperties properties = new CallbackMapProperties(addMessageProperties(
                         creator.createRequestContext(custAssertion, getResource(message), null), message));
-                    oSAMLCallback.setAssertionElement(builder.build(properties));
+                    Element element = builder.build(properties);
+                    LogEventRequestType auditObj = populateSubjectNameIDInAudit(element, auditMsg);
+                    //message.put("auditMsg", populateSubjectNameIDInAudit(element, auditMsg));
+                    ejblookup.getAuditLogger().auditLogMessages(auditObj, custAssertion);
+                    oSAMLCallback.setAssertionElement(element);
                 } catch (WSSecurityException | PropertyAccessException e) {
                     LOG.error("Failed to create saml: {}", e.getLocalizedMessage(), e);
                     throw new SAMLAssertionBuilderException(e.getMessage(), e);
@@ -119,7 +129,6 @@ public class CXFSAMLCallbackHandler implements CallbackHandler {
         }
 
         LOG.trace("CXFSAMLCallbackHandler.handle end");
-
 
     }
 
@@ -169,5 +178,17 @@ public class CXFSAMLCallbackHandler implements CallbackHandler {
             LOG.error("Get resource exception: {}", e.getLocalizedMessage(), e);
         }
         return resource;
+    }
+
+    private LogEventRequestType populateSubjectNameIDInAudit(Element element, Object auditMsg) {
+        LogEventRequestType auditObj = null;
+        if (null != element && null != auditMsg) {
+            NodeList nl = element.getElementsByTagName("saml2:NameID");
+            auditObj = (LogEventRequestType) auditMsg;
+            if (nl != null && nl.item(0) != null) {
+                auditObj.setUserId(nl.item(0).getTextContent());
+            }
+        }
+        return auditObj;
     }
 }

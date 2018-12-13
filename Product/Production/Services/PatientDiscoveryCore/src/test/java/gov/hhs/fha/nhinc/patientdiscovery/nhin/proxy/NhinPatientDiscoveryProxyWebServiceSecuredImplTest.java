@@ -26,13 +26,8 @@
  */
 package gov.hhs.fha.nhinc.patientdiscovery.nhin.proxy;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-
 import gov.hhs.fha.nhinc.aspect.NwhinInvocationEvent;
+import gov.hhs.fha.nhinc.common.auditlog.LogEventRequestType;
 import gov.hhs.fha.nhinc.common.nhinccommon.AssertionType;
 import gov.hhs.fha.nhinc.common.nhinccommon.NhinTargetSystemType;
 import gov.hhs.fha.nhinc.messaging.client.CONNECTClient;
@@ -49,11 +44,16 @@ import org.jmock.integration.junit4.JUnit4Mockery;
 import org.jmock.lib.legacy.ClassImposteriser;
 import org.junit.After;
 import org.junit.AfterClass;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 
 /**
  *
@@ -97,9 +97,10 @@ public class NhinPatientDiscoveryProxyWebServiceSecuredImplTest {
 
     @Test
     public void hasNwhinInvocationEvent() throws Exception {
-        Class<NhinPatientDiscoveryProxyWebServiceSecuredImpl> clazz = NhinPatientDiscoveryProxyWebServiceSecuredImpl.class;
+        Class<NhinPatientDiscoveryProxyWebServiceSecuredImpl> clazz
+            = NhinPatientDiscoveryProxyWebServiceSecuredImpl.class;
         Method method = clazz.getMethod("respondingGatewayPRPAIN201305UV02", PRPAIN201305UV02.class,
-                AssertionType.class, NhinTargetSystemType.class);
+            AssertionType.class, NhinTargetSystemType.class);
         NwhinInvocationEvent annotation = method.getAnnotation(NwhinInvocationEvent.class);
         assertNotNull(annotation);
         assertEquals(PRPAIN201305UV02EventDescriptionBuilder.class, annotation.beforeBuilder());
@@ -132,7 +133,8 @@ public class NhinPatientDiscoveryProxyWebServiceSecuredImplTest {
              */
             @Override
             protected CONNECTClient<RespondingGatewayPortType> getCONNECTSecuredClient(NhinTargetSystemType target,
-                    ServicePortDescriptor<RespondingGatewayPortType> portDescriptor, String url, AssertionType assertion) {
+                ServicePortDescriptor<RespondingGatewayPortType> portDescriptor, String url, AssertionType assertion,
+                LogEventRequestType auditMsg) {
                 return client;
             }
         };

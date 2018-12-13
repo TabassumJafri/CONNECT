@@ -15,16 +15,16 @@
         <!-- CONNECT Modules / Web Services -->
         <dependency>
             <groupId>org.connectopensource</groupId>
-            <artifactId>AuditRepositoryCore</artifactId>
-            <version>${project.parent.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.connectopensource</groupId>
             <artifactId>CONNECTCommonTypesLib</artifactId>
         </dependency>
         <dependency>
             <groupId>org.connectopensource</groupId>
             <artifactId>AuditRepositoryWebservices</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.connectopensource</groupId>
+            <artifactId>AuditRepositoryCore</artifactId>
+            <version>${project.parent.version}</version>
         </dependency>
 
         <!-- Java EE APIs -->

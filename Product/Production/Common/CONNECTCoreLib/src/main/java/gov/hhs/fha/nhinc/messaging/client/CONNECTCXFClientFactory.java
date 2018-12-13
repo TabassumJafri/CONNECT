@@ -26,6 +26,7 @@
  */
 package gov.hhs.fha.nhinc.messaging.client;
 
+import gov.hhs.fha.nhinc.common.auditlog.LogEventRequestType;
 import gov.hhs.fha.nhinc.common.nhinccommon.AssertionType;
 import gov.hhs.fha.nhinc.messaging.service.port.ServicePortDescriptor;
 import javax.xml.ws.WebServiceException;
@@ -38,6 +39,7 @@ import org.apache.commons.lang3.StringUtils;
 public class CONNECTCXFClientFactory extends CONNECTClientFactory {
 
     private static final String ERROR = "Could not resolve URL for CONNECT Webservice Client";
+
     /**
      * Returns a CONNECTClient configured for secured invocation.
      */
@@ -81,4 +83,16 @@ public class CONNECTCXFClientFactory extends CONNECTClientFactory {
         return new CONNECTCXFClientUnsecured<>(portDescriptor, url, assertion);
     }
 
+    @Override
+    public <T> CONNECTClient<T> getCONNECTClientSecured(ServicePortDescriptor<T> portDescriptor,
+        AssertionType assertion, String url, String targetHomeCommunityId, String serviceName,
+        LogEventRequestType auditMsg) {
+
+        if (StringUtils.isEmpty(url)) {
+            throw new WebServiceException(ERROR);
+        }
+
+        return new CONNECTCXFClientSecured<>(portDescriptor, assertion, url, targetHomeCommunityId, serviceName,
+            auditMsg);
+    }
 }

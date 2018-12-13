@@ -18,5 +18,7 @@
     <modules>
         <module>Properties</module>
         <module>CONNECTCoreLib</module>
+        <module>AuditRepositoryCore</module>
+        <module>AuditRepositoryEJB</module>
     </modules>
 </project>
