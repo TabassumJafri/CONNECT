@@ -697,6 +697,9 @@ public class NhincConstants {
     public static final String ADMIN_DASHBOARD_ERRORLOG_LIST = "listErrorLog";
     public static final String ADMIN_DASHBOARD_ERRORLOG_GETFILTERS = "getSearchFilter";
     public static final String ADMIN_DASHBOARD_ERRORLOG_VIEW = "viewErrorLog";
+    // Message Constants
+    public static final String AUDIT_MESSAGE = "auditMsg";
+    public static final String ASSERTION = "assertion";
 
     private NhincConstants() {
     }

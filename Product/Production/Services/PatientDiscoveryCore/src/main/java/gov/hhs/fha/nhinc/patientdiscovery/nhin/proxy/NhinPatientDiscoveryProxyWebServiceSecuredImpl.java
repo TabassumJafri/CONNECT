@@ -56,6 +56,7 @@ import org.slf4j.LoggerFactory;
 public class NhinPatientDiscoveryProxyWebServiceSecuredImpl implements NhinPatientDiscoveryProxy {
 
     private static final Logger LOG = LoggerFactory.getLogger(NhinPatientDiscoveryProxyWebServiceSecuredImpl.class);
+    private PatientDiscoveryAuditMessage pdAuditMsgBuilder = null;
 
     protected CONNECTClient<RespondingGatewayPortType> getCONNECTSecuredClient(NhinTargetSystemType target,
         ServicePortDescriptor<RespondingGatewayPortType> portDescriptor, String url, AssertionType assertion,
@@ -90,7 +91,7 @@ public class NhinPatientDiscoveryProxyWebServiceSecuredImpl implements NhinPatie
 
                     CONNECTClient<RespondingGatewayPortType> client = getCONNECTSecuredClient(target, portDescriptor,
                         url, assertion, getAuditMessage(request, assertion, target));
-
+                    LOG.info(" ***********NhinPatientDiscoveryProxyWebServiceSecuredImpl invoking port");
                     response = (PRPAIN201306UV02) client.invokePort(RespondingGatewayPortType.class,
                         "respondingGatewayPRPAIN201305UV02", request);
                 } else {
@@ -111,7 +112,10 @@ public class NhinPatientDiscoveryProxyWebServiceSecuredImpl implements NhinPatie
     }
 
     protected PatientDiscoveryAuditMessage getPDAuditMessageBuilder() {
-        return new PatientDiscoveryAuditMessage();
+        if (null == pdAuditMsgBuilder) {
+            pdAuditMsgBuilder = new PatientDiscoveryAuditMessage();
+        }
+        return pdAuditMsgBuilder;
     }
 
     private LogEventRequestType getAuditMessage(final PRPAIN201305UV02 request, final AssertionType assertion,

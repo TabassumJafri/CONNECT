@@ -26,18 +26,23 @@
  */
 package gov.hhs.fha.nhinc.callback.cxf;
 
+import gov.hhs.fha.nhinc.audit.AuditEJBLookup;
+import gov.hhs.fha.nhinc.audit.AuditMessageLogger;
+import gov.hhs.fha.nhinc.callback.SamlConstants;
+import gov.hhs.fha.nhinc.callback.opensaml.CallbackProperties;
+import gov.hhs.fha.nhinc.callback.opensaml.HOKSAMLAssertionBuilder;
 import gov.hhs.fha.nhinc.common.nhinccommon.AssertionType;
-import gov.hhs.fha.nhinc.common.nhinccommon.CeType;
-import gov.hhs.fha.nhinc.common.nhinccommon.HomeCommunityType;
-import gov.hhs.fha.nhinc.common.nhinccommon.PersonNameType;
-import gov.hhs.fha.nhinc.common.nhinccommon.UserType;
+import gov.hhs.fha.nhinc.nhinclib.NhincConstants;
+import javax.security.auth.callback.Callback;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import org.apache.cxf.message.Message;
+import org.apache.wss4j.common.saml.SAMLCallback;
 import static org.junit.Assert.assertEquals;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import org.w3c.dom.Document;
@@ -61,29 +66,42 @@ public class CXFSAMLCallbackHandlerTest {
         assertionElement.setTextContent(ASSERTION);
     }
 
-    /*
-     * @Test public void testHandle() throws Exception { Callback[] callbackList = new Callback[1]; SAMLCallback
-     * samlCallback = new SAMLCallback(); callbackList[0] = samlCallback; final Message message = mock(Message.class);
-     * AssertionType assertionType = mock(AssertionType.class); HOKSAMLAssertionBuilder builder =
-     * mock(HOKSAMLAssertionBuilder.class); AuditEJBLookup ejbLookup = mock(AuditEJBLookup.class); AuditMessageLogger
-     * logger = mock(AuditMessageLogger.class); CXFSAMLCallbackHandler callbackHandler = new
-     * CXFSAMLCallbackHandler(builder) { @Override protected Message getCurrentMessage() { return message; } };
-     *
-     * when(message.get("assertion")).thenReturn(assertionType);
-     * when(message.get(Message.INBOUND_MESSAGE)).thenReturn(false);
-     * when(message.get(NhincConstants.WS_SOAP_TARGET_HOME_COMMUNITY_ID)).thenReturn("1.1");
-     * when(message.get(NhincConstants.TARGET_API_LEVEL)).thenReturn("G0");
-     * when(message.get(SamlConstants.ACTION_PROP)).thenReturn("Soap Action");
-     * when(ejbLookup.getAuditLogger()).thenReturn(logger);
-     * when(builder.build(any(CallbackProperties.class))).thenReturn(assertionElement);
-     *
-     * callbackHandler.handle(callbackList);
-     *
-     * assertEquals(samlCallback.getSamlVersion(), org.opensaml.saml.common.SAMLVersion.VERSION_20);
-     * assertEquals(samlCallback.getAssertionElement().getTextContent(), ASSERTION);
-     *
-     * }
-     */
+    @Test
+    public void testHandle() throws Exception {
+        Callback[] callbackList = new Callback[1];
+        SAMLCallback samlCallback = new SAMLCallback();
+        callbackList[0] = samlCallback;
+        final Message message = mock(Message.class);
+        AssertionType assertionType = mock(AssertionType.class);
+        HOKSAMLAssertionBuilder builder = mock(HOKSAMLAssertionBuilder.class);
+        final AuditEJBLookup ejbLookup = mock(AuditEJBLookup.class);
+        AuditMessageLogger logger = mock(AuditMessageLogger.class);
+        CXFSAMLCallbackHandler callbackHandler = new CXFSAMLCallbackHandler(builder) {
+            @Override
+            protected Message getCurrentMessage() {
+                return message;
+            }
+
+            @Override
+            protected AuditEJBLookup getEJBLookup() {
+                return ejbLookup;
+            }
+        };
+
+        when(message.get("assertion")).thenReturn(assertionType);
+        when(message.get(Message.INBOUND_MESSAGE)).thenReturn(false);
+        when(message.get(NhincConstants.WS_SOAP_TARGET_HOME_COMMUNITY_ID)).thenReturn("1.1");
+        when(message.get(NhincConstants.TARGET_API_LEVEL)).thenReturn("G0");
+        when(message.get(SamlConstants.ACTION_PROP)).thenReturn("Soap Action");
+        when(ejbLookup.getAuditLogger()).thenReturn(logger);
+        when(builder.build(any(CallbackProperties.class))).thenReturn(assertionElement);
+
+        callbackHandler.handle(callbackList);
+
+        assertEquals(samlCallback.getSamlVersion(), org.opensaml.saml.common.SAMLVersion.VERSION_20);
+        assertEquals(samlCallback.getAssertionElement().getTextContent(), ASSERTION);
+    }
+
     @Test
     public void testGetResource() {
         final Message message = mock(Message.class);
@@ -97,50 +115,4 @@ public class CXFSAMLCallbackHandlerTest {
 
         assertEquals(resource, URL);
     }
-
-    private AssertionType createAssertionInfo() {
-        AssertionType assertion = new AssertionType();
-        assertion.setPersonName(createPerson());
-        assertion.setHomeCommunity(createHomeCommunityType());
-        assertion.setUserInfo(createUserType());
-        assertion.setPurposeOfDisclosureCoded(createCeType());
-        return assertion;
-
-    }
-
-    private UserType createUserType() {
-        UserType userInfo = new UserType();
-        userInfo.setOrg(createHomeCommunityType());
-        userInfo.setPersonName(createPerson());
-        userInfo.setUserName("CONNECT");
-        userInfo.setRoleCoded(createCeType());
-        return userInfo;
-    }
-
-    private HomeCommunityType createHomeCommunityType() {
-        HomeCommunityType home = new HomeCommunityType();
-        home.setName("CONNECT");
-        home.setHomeCommunityId("1.1");
-        home.setDescription("CONNECTCommunity");
-        return home;
-    }
-
-    private CeType createCeType() {
-        CeType ce = new CeType();
-        ce.setCode("code");
-        ce.setCodeSystem("codesystem");
-        ce.setCodeSystemName("Connect");
-        ce.setDisplayName("display");
-        return ce;
-    }
-
-    private PersonNameType createPerson() {
-        PersonNameType person = new PersonNameType();
-        person.setFamilyName("HopKins");
-        person.setFullName("Michael Hunter");
-        person.setGivenName("Michael");
-        person.setSecondNameOrInitials("Simmons");
-        return person;
-    }
-
 }

@@ -1,7 +1,7 @@
 /*
  * Copyright (c) 2009-2018, United States Government, as represented by the Secretary of Health and Human Services.
  * All rights reserved.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are met:
  *     * Redistributions of source code must retain the above
@@ -12,7 +12,7 @@
  *     * Neither the name of the United States Government nor the
  *       names of its contributors may be used to endorse or promote products
  *       derived from this software without specific prior written permission.
- * 
+ *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -27,15 +27,20 @@
 package gov.hhs.fha.nhinc.patientdiscovery._10.gateway.ws;
 
 import gov.hhs.fha.nhinc.aspect.InboundMessageEvent;
+import gov.hhs.fha.nhinc.audit.AuditEJBLookup;
+import gov.hhs.fha.nhinc.common.auditlog.LogEventRequestType;
 import gov.hhs.fha.nhinc.common.nhinccommon.AssertionType;
 import gov.hhs.fha.nhinc.messaging.server.BaseService;
+import gov.hhs.fha.nhinc.nhinclib.NhincConstants;
 import gov.hhs.fha.nhinc.patientdiscovery.PatientDiscoveryException;
 import gov.hhs.fha.nhinc.patientdiscovery.aspect.PRPAIN201305UV02EventDescriptionBuilder;
 import gov.hhs.fha.nhinc.patientdiscovery.aspect.PRPAIN201306UV02EventDescriptionBuilder;
+import gov.hhs.fha.nhinc.patientdiscovery.audit.PatientDiscoveryAuditMessage;
 import gov.hhs.fha.nhinc.patientdiscovery.inbound.InboundPatientDiscovery;
 import gov.hhs.healthit.nhin.PatientDiscoveryFaultType;
 import ihe.iti.xcpd._2009.PRPAIN201305UV02Fault;
 import ihe.iti.xcpd._2009.RespondingGatewayPortType;
+import java.util.Properties;
 import javax.annotation.Resource;
 import javax.xml.ws.BindingType;
 import javax.xml.ws.WebServiceContext;
@@ -53,7 +58,8 @@ public class NhinPatientDiscovery extends BaseService implements RespondingGatew
     private InboundPatientDiscovery inboundPatientDiscovery;
 
     private WebServiceContext context;
-
+    private PatientDiscoveryAuditMessage pdAuditMsgBuilder = null;
+    private AuditEJBLookup ejblookup = new AuditEJBLookup();
     private static final Logger LOG = LoggerFactory.getLogger(NhinPatientDiscovery.class);
 
     /**
@@ -76,8 +82,13 @@ public class NhinPatientDiscovery extends BaseService implements RespondingGatew
     @Override
     public PRPAIN201306UV02 respondingGatewayPRPAIN201305UV02(PRPAIN201305UV02 body) throws PRPAIN201305UV02Fault {
         try {
+            LOG.info("**************** reached NhinPatientDiscovery");
             AssertionType assertion = getAssertion(context, null);
-            return inboundPatientDiscovery.respondingGatewayPRPAIN201305UV02(body, assertion, getWebContextProperties(context));
+            Properties wsContextProperties = getWebContextProperties(context);
+            PRPAIN201306UV02 response = inboundPatientDiscovery.respondingGatewayPRPAIN201305UV02(body, assertion,
+                wsContextProperties);
+            auditResponse(body, response, assertion, wsContextProperties);
+            return response;
         } catch (PatientDiscoveryException e) {
             LOG.trace("Nhin PD exception: {}", e.getLocalizedMessage(), e);
             PatientDiscoveryFaultType type = new PatientDiscoveryFaultType();
@@ -105,4 +116,21 @@ public class NhinPatientDiscovery extends BaseService implements RespondingGatew
     public InboundPatientDiscovery getInboundPatientDiscovery() {
         return this.inboundPatientDiscovery;
     }
+
+    protected void auditResponse(PRPAIN201305UV02 request, PRPAIN201306UV02 response, AssertionType assertion,
+        Properties webContextProperties) {
+
+        LogEventRequestType auditMsg = getPDAuditMessageBuilder().auditResponseMessage(request, response, assertion,
+            null, NhincConstants.AUDIT_LOG_INBOUND_DIRECTION, NhincConstants.AUDIT_LOG_NHIN_INTERFACE, Boolean.FALSE,
+            webContextProperties, NhincConstants.PATIENT_DISCOVERY_SERVICE_NAME);
+        ejblookup.getAuditLogger().auditLogMessages(auditMsg, assertion);
+    }
+
+    protected PatientDiscoveryAuditMessage getPDAuditMessageBuilder() {
+        if (null == pdAuditMsgBuilder) {
+            pdAuditMsgBuilder = new PatientDiscoveryAuditMessage();
+        }
+        return pdAuditMsgBuilder;
+    }
+
 }

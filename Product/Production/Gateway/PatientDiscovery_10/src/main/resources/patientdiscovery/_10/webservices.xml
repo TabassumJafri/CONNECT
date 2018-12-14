@@ -44,7 +44,11 @@
 
         <jaxws:inInterceptors>
             <ref bean="securityConfigInInterceptor" />
+            <ref bean ="auditInInterceptor"/>
         </jaxws:inInterceptors>
+        <jaxws:outInterceptors>
+            <ref bean="auditOutInterceptor" />
+        </jaxws:outInterceptors>
         <jaxws:handlers>
             <ref bean="SOAPHeaderHandler" />
             <ref bean="TransactionHandler" />

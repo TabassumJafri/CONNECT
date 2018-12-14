@@ -118,8 +118,9 @@ public class CXFSAMLCallbackHandler implements CallbackHandler {
                         creator.createRequestContext(custAssertion, getResource(message), null), message));
                     Element element = builder.build(properties);
                     LogEventRequestType auditObj = populateSubjectNameIDInAudit(element, auditMsg);
-                    //message.put("auditMsg", populateSubjectNameIDInAudit(element, auditMsg));
-                    ejblookup.getAuditLogger().auditLogMessages(auditObj, custAssertion);
+                    if (auditObj != null) {
+                        getEJBLookup().getAuditLogger().auditLogMessages(auditObj, custAssertion);
+                    }
                     oSAMLCallback.setAssertionElement(element);
                 } catch (WSSecurityException | PropertyAccessException e) {
                     LOG.error("Failed to create saml: {}", e.getLocalizedMessage(), e);
@@ -178,6 +179,10 @@ public class CXFSAMLCallbackHandler implements CallbackHandler {
             LOG.error("Get resource exception: {}", e.getLocalizedMessage(), e);
         }
         return resource;
+    }
+
+    protected AuditEJBLookup getEJBLookup() {
+        return ejblookup;
     }
 
     private LogEventRequestType populateSubjectNameIDInAudit(Element element, Object auditMsg) {
