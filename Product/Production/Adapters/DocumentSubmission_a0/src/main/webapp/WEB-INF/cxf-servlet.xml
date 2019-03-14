@@ -30,6 +30,9 @@
         <cxf:features>
             <p:policies />
         </cxf:features>
+        <cxf:outInterceptors>
+            <ref bean="soapActionOutInterceptor" />
+        </cxf:outInterceptors>
     </cxf:bus>
 
     <jaxws:endpoint xmlns:tns="urn:gov:hhs:fha:nhinc:adapterxdrsecured" id="AdapterDocSubmissionSecured"

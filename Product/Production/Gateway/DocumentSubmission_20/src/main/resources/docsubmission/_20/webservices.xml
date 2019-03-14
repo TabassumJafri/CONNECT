@@ -25,6 +25,9 @@
         <cxf:features>
             <p:policies />
         </cxf:features>
+        <cxf:outInterceptors>
+            <ref bean="soapActionOutInterceptor" />
+        </cxf:outInterceptors>
     </cxf:bus>
 
     <!-- Nhin Services -->
