@@ -40,7 +40,6 @@
                   "code" : "Subparticipant"
                   }]
             }],
-			"alias": [],
 			"contact": [{
 				"purpose": {
 					"text": "Systems Administrator"
@@ -693,7 +692,7 @@
 			}],
 			"active": "true",
 			"name": "Conformance1-5AM",
-			"alias": [],
+			"alias": ["Conformance1-5AM-alias"],
 			"contact": [{
 				"purpose": {
 					"text": "Systems Administrator"
