@@ -24,43 +24,49 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package gov.hhs.fha.nhinc.docquery.deferred.nhin;
+package gov.hhs.fha.nhinc.deferredresults.dao;
 
-import gov.hhs.fha.nhinc.deferredresults.inbound.InboundDeferredResults;
-import gov.hhs.fha.nhinc.dq.nhindeferredresultsecured.NhinDocQueryDeferredResponseSecuredPortType;
-import javax.annotation.Resource;
-import javax.xml.ws.BindingType;
-import javax.xml.ws.WebServiceContext;
-import javax.xml.ws.soap.Addressing;
-import javax.xml.ws.soap.SOAPBinding;
-import oasis.names.tc.ebxml_regrep.xsd.query._3.AdhocQueryResponse;
-import oasis.names.tc.ebxml_regrep.xsd.rs._3.RegistryResponseType;
+import gov.hhs.fha.nhinc.persistence.HibernateUtilFactory;
+import java.util.List;
+import org.apache.commons.collections.CollectionUtils;
+import org.hibernate.Criteria;
+import org.hibernate.HibernateException;
+import org.hibernate.Session;
+import org.hibernate.criterion.Restrictions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- * Web-service for processing a DeferredResponseOption's response from the Responding Gateway.
+ *
+ * @author tjafri
  */
-@BindingType(value = SOAPBinding.SOAP12HTTP_BINDING)
-@Addressing(enabled = true)
-public class NhinDeferredResultsOption implements NhinDocQueryDeferredResponseSecuredPortType {
+public class DQDeferredResultsDAO {
 
-    private InboundDeferredResults inboundDeferredResults;
-    private WebServiceContext context;
+    private static final Logger LOG = LoggerFactory.getLogger(DQDeferredResultsDAO.class);
+    static Session session = null;
 
-    @Override
-    public RegistryResponseType respondingGatewayCrossGatewayQueryDeferredNhinSecured(AdhocQueryResponse body) {
-        return inboundDeferredResults.respondingGatewayCrossGatewayQueryNhinDeferredResults(body, context);
+    /*
+     * This method pulls the deferred response endpoint, based on AdhocQueryResponse's requestId attribute, when a
+     * Deferred Results requets is sent. This is the second exchange workflow as defined in Deferred Response Option IHE
+     * Spec.
+     */
+    public static String getDeferredResponseEndpoint(String adhocQueryResponseRequestId) {
+        session = getSession();
+        Criteria criteria = session.createCriteria(DQDeferredResults.class);
+        criteria.add(Restrictions.eq("adhocQueryRequestId", adhocQueryResponseRequestId));
+        List results = criteria.list();
+        return CollectionUtils.isEmpty(results) ? null : (String) results.get(0);
     }
 
-    @Resource
-    public void setContext(WebServiceContext context) {
-        this.context = context;
+    private static Session getSession() {
+        try {
+            session = HibernateUtilFactory.getDocRepoHibernateUtil().getSessionFactory().openSession();
+        } catch (HibernateException e) {
+            LOG.error("Error opening seesion on docrepository database: {}, {}", e.getMessage(), e);
+        }
+        return session;
     }
 
-    public InboundDeferredResults getInboundDeferredResults() {
-        return inboundDeferredResults;
-    }
-
-    public void setInboundDeferredResults(InboundDeferredResults inboundDeferredResults) {
-        this.inboundDeferredResults = inboundDeferredResults;
+    private DQDeferredResultsDAO() {
     }
 }

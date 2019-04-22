@@ -24,43 +24,22 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package gov.hhs.fha.nhinc.docquery.deferred.nhin;
+package gov.hhs.fha.nhinc.deferredresults.inbound;
 
-import gov.hhs.fha.nhinc.deferredresults.inbound.InboundDeferredResults;
-import gov.hhs.fha.nhinc.dq.nhindeferredresultsecured.NhinDocQueryDeferredResponseSecuredPortType;
-import javax.annotation.Resource;
-import javax.xml.ws.BindingType;
 import javax.xml.ws.WebServiceContext;
-import javax.xml.ws.soap.Addressing;
-import javax.xml.ws.soap.SOAPBinding;
 import oasis.names.tc.ebxml_regrep.xsd.query._3.AdhocQueryResponse;
 import oasis.names.tc.ebxml_regrep.xsd.rs._3.RegistryResponseType;
 
 /**
- * Web-service for processing a DeferredResponseOption's response from the Responding Gateway.
+ *
+ * @author tjafri
  */
-@BindingType(value = SOAPBinding.SOAP12HTTP_BINDING)
-@Addressing(enabled = true)
-public class NhinDeferredResultsOption implements NhinDocQueryDeferredResponseSecuredPortType {
-
-    private InboundDeferredResults inboundDeferredResults;
-    private WebServiceContext context;
+public class StandardInboundDeferredResults implements InboundDeferredResults {
 
     @Override
-    public RegistryResponseType respondingGatewayCrossGatewayQueryDeferredNhinSecured(AdhocQueryResponse body) {
-        return inboundDeferredResults.respondingGatewayCrossGatewayQueryNhinDeferredResults(body, context);
+    public RegistryResponseType respondingGatewayCrossGatewayQueryNhinDeferredResults(AdhocQueryResponse body,
+        WebServiceContext context) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
-    @Resource
-    public void setContext(WebServiceContext context) {
-        this.context = context;
-    }
-
-    public InboundDeferredResults getInboundDeferredResults() {
-        return inboundDeferredResults;
-    }
-
-    public void setInboundDeferredResults(InboundDeferredResults inboundDeferredResults) {
-        this.inboundDeferredResults = inboundDeferredResults;
-    }
 }

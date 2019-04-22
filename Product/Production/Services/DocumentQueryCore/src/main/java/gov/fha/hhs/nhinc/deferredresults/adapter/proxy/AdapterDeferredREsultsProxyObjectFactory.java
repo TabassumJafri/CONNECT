@@ -24,43 +24,26 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package gov.hhs.fha.nhinc.docquery.deferred.nhin;
+package gov.fha.hhs.nhinc.deferredresults.adapter.proxy;
 
-import gov.hhs.fha.nhinc.deferredresults.inbound.InboundDeferredResults;
-import gov.hhs.fha.nhinc.dq.nhindeferredresultsecured.NhinDocQueryDeferredResponseSecuredPortType;
-import javax.annotation.Resource;
-import javax.xml.ws.BindingType;
-import javax.xml.ws.WebServiceContext;
-import javax.xml.ws.soap.Addressing;
-import javax.xml.ws.soap.SOAPBinding;
-import oasis.names.tc.ebxml_regrep.xsd.query._3.AdhocQueryResponse;
-import oasis.names.tc.ebxml_regrep.xsd.rs._3.RegistryResponseType;
+import gov.hhs.fha.nhinc.docquery.adapter.proxy.AdapterDocQueryProxy;
+import gov.hhs.fha.nhinc.proxy.ComponentProxyObjectFactory;
 
 /**
- * Web-service for processing a DeferredResponseOption's response from the Responding Gateway.
+ *
+ * @author tjafri
  */
-@BindingType(value = SOAPBinding.SOAP12HTTP_BINDING)
-@Addressing(enabled = true)
-public class NhinDeferredResultsOption implements NhinDocQueryDeferredResponseSecuredPortType {
+public class AdapterDeferredREsultsProxyObjectFactory extends ComponentProxyObjectFactory {
 
-    private InboundDeferredResults inboundDeferredResults;
-    private WebServiceContext context;
+    private static final String CONFIG_FILE_NAME = "DeferredResultsProxyConfig.xml";
+    private static final String BEAN_NAME = "adapterdeferredresults";
 
     @Override
-    public RegistryResponseType respondingGatewayCrossGatewayQueryDeferredNhinSecured(AdhocQueryResponse body) {
-        return inboundDeferredResults.respondingGatewayCrossGatewayQueryNhinDeferredResults(body, context);
+    protected String getConfigFileName() {
+        return CONFIG_FILE_NAME;
     }
 
-    @Resource
-    public void setContext(WebServiceContext context) {
-        this.context = context;
-    }
-
-    public InboundDeferredResults getInboundDeferredResults() {
-        return inboundDeferredResults;
-    }
-
-    public void setInboundDeferredResults(InboundDeferredResults inboundDeferredResults) {
-        this.inboundDeferredResults = inboundDeferredResults;
+    public AdapterDocQueryProxy getAdapterDeferredResultsProxy() {
+        return getBean(BEAN_NAME, AdapterDeferredResultsProxy.class);
     }
 }

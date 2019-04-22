@@ -58,4 +58,16 @@
 
     <bean id="SOAPHeaderHandler" class="gov.hhs.fha.nhinc.callback.SOAPHeaderHandler" />
     <bean id="TransactionHandler" class="gov.hhs.fha.nhinc.logging.transaction.TransactionHandler" />
+
+
+    <bean id="nhinDeferredResults" class="gov.hhs.fha.nhinc.docquery.deferred.nhin.NhinDeferredResultsOption">
+        <property name="inboundDeferredResults">
+            <bean class="${docquery.30.inboundDocQuery}" />
+        </property>
+    </bean>
+
+    <bean id="stdDeferredResultsInbound"
+      class="gov.hhs.fha.nhinc.deferredresults.inbound.StandardInboundDeferredResults">
+    </bean>
+
 </beans>

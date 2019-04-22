@@ -24,43 +24,30 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package gov.hhs.fha.nhinc.docquery.deferred.nhin;
-
-import gov.hhs.fha.nhinc.deferredresults.inbound.InboundDeferredResults;
-import gov.hhs.fha.nhinc.dq.nhindeferredresultsecured.NhinDocQueryDeferredResponseSecuredPortType;
-import javax.annotation.Resource;
-import javax.xml.ws.BindingType;
-import javax.xml.ws.WebServiceContext;
-import javax.xml.ws.soap.Addressing;
-import javax.xml.ws.soap.SOAPBinding;
-import oasis.names.tc.ebxml_regrep.xsd.query._3.AdhocQueryResponse;
-import oasis.names.tc.ebxml_regrep.xsd.rs._3.RegistryResponseType;
+package gov.hhs.fha.nhinc.deferredresults.dao;
 
 /**
- * Web-service for processing a DeferredResponseOption's response from the Responding Gateway.
+ *
+ * @author tjafri
  */
-@BindingType(value = SOAPBinding.SOAP12HTTP_BINDING)
-@Addressing(enabled = true)
-public class NhinDeferredResultsOption implements NhinDocQueryDeferredResponseSecuredPortType {
+public class DQDeferredResults {
 
-    private InboundDeferredResults inboundDeferredResults;
-    private WebServiceContext context;
+    private String adhocQueryRequestId;
+    private String deferredResponseEndpoint;
 
-    @Override
-    public RegistryResponseType respondingGatewayCrossGatewayQueryDeferredNhinSecured(AdhocQueryResponse body) {
-        return inboundDeferredResults.respondingGatewayCrossGatewayQueryNhinDeferredResults(body, context);
+    public String getAdhocQueryRequestId() {
+        return adhocQueryRequestId;
     }
 
-    @Resource
-    public void setContext(WebServiceContext context) {
-        this.context = context;
+    public void setAdhocQueryRequestId(String adhocQueryRequestId) {
+        this.adhocQueryRequestId = adhocQueryRequestId;
     }
 
-    public InboundDeferredResults getInboundDeferredResults() {
-        return inboundDeferredResults;
+    public String getDeferredResponseEndpoint() {
+        return deferredResponseEndpoint;
     }
 
-    public void setInboundDeferredResults(InboundDeferredResults inboundDeferredResults) {
-        this.inboundDeferredResults = inboundDeferredResults;
+    public void setDeferredResponseEndpoint(String deferredResponseEndpoint) {
+        this.deferredResponseEndpoint = deferredResponseEndpoint;
     }
 }

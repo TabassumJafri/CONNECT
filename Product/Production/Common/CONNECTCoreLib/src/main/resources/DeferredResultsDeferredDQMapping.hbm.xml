@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping SYSTEM "classpath://org/hibernate/hibernate-configuration-3.0.dtd">
+<hibernate-mapping package="gov.hhs.fha.nhinc.deferredresults.dao">
+    <class name="DQDeferredResults" table="deferredxcaresponse">
+        <id column="AdHocQueryRequestId" name="adhocQueryRequestId" type="String">
+        </id>
+       <property column="DeferredResponseEndpoint" name="deferredResponseEndpoint" not-null="true"/>
+    </class>
+</hibernate-mapping>

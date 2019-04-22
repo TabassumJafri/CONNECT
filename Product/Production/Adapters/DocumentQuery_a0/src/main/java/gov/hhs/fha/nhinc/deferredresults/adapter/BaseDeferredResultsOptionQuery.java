@@ -24,43 +24,38 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package gov.hhs.fha.nhinc.docquery.deferred.nhin;
+package gov.hhs.fha.nhinc.deferredresults.adapter;
 
-import gov.hhs.fha.nhinc.deferredresults.inbound.InboundDeferredResults;
-import gov.hhs.fha.nhinc.dq.nhindeferredresultsecured.NhinDocQueryDeferredResponseSecuredPortType;
-import javax.annotation.Resource;
-import javax.xml.ws.BindingType;
-import javax.xml.ws.WebServiceContext;
-import javax.xml.ws.soap.Addressing;
-import javax.xml.ws.soap.SOAPBinding;
+import gov.hhs.fha.nhinc.deferredresults.dao.DQDeferredResultsDAO;
 import oasis.names.tc.ebxml_regrep.xsd.query._3.AdhocQueryResponse;
 import oasis.names.tc.ebxml_regrep.xsd.rs._3.RegistryResponseType;
+import org.apache.commons.lang3.StringUtils;
 
 /**
- * Web-service for processing a DeferredResponseOption's response from the Responding Gateway.
+ *
+ * @author tjafri
  */
-@BindingType(value = SOAPBinding.SOAP12HTTP_BINDING)
-@Addressing(enabled = true)
-public class NhinDeferredResultsOption implements NhinDocQueryDeferredResponseSecuredPortType {
+public class BaseDeferredResultsOptionQuery {
 
-    private InboundDeferredResults inboundDeferredResults;
-    private WebServiceContext context;
+    public static final String ACK_SUCCESS = "urn:oasis:names:tc:ebxml-regrep:ResponseStatusType:Success";
+    public static final String ACK_FAILURE = "urn:oasis:names:tc:ebxml-regrep:ResponseStatusType:Failure";
 
-    @Override
-    public RegistryResponseType respondingGatewayCrossGatewayQueryDeferredNhinSecured(AdhocQueryResponse body) {
-        return inboundDeferredResults.respondingGatewayCrossGatewayQueryNhinDeferredResults(body, context);
+    protected RegistryResponseType processGatewayCrossGatewayQueryResults(AdhocQueryResponse adhocQueryResponse) {
+        String deferredResponseEp = null;
+        if (null != adhocQueryResponse && StringUtils.isNotBlank(adhocQueryResponse.getRequestId())) {
+            deferredResponseEp = DQDeferredResultsDAO.getDeferredResponseEndpoint(adhocQueryResponse.
+                getRequestId());
+        }
+        return prepareResponse(deferredResponseEp);
     }
 
-    @Resource
-    public void setContext(WebServiceContext context) {
-        this.context = context;
-    }
-
-    public InboundDeferredResults getInboundDeferredResults() {
-        return inboundDeferredResults;
-    }
-
-    public void setInboundDeferredResults(InboundDeferredResults inboundDeferredResults) {
-        this.inboundDeferredResults = inboundDeferredResults;
+    private RegistryResponseType prepareResponse(String deferredResponseEp) {
+        RegistryResponseType response = new RegistryResponseType();
+        if (StringUtils.isBlank(deferredResponseEp)) {
+            response.setStatus(ACK_FAILURE);
+        } else {
+            response.setStatus(ACK_SUCCESS);
+        }
+        return response;
     }
 }
